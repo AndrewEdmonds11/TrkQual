@@ -40,4 +40,14 @@ then copy and paste the URL that prints out to your browser.
 You will see a directory listing of the TrkQual directory. Click the TrkQualTrain.ipynb to open the notebook in your browser. Make any changes that you want to the trainings (e.g. new variables, train on a different dataset) and then click "Kernel->Restart & Run All". Your model will be saved in the model/ directory.
 
 ## Exporting a saved model to be used in Offline
-  
+
+Create the ```.dat``` and ```.hxx``` file that we need in Offline
+
+ root -l -b CreateInference.C\(\"trkqual\"\)
+
+and copy them to the correct places
+
+ cp code/trkqual.dat ../Offline/TrkDiag/data/
+ cp code/trkqual.hxx ../Offline/TrkDiag/inc/
+ 
+Make sure features are updated in the TrackQuality module
