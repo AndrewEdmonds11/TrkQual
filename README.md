@@ -1,5 +1,5 @@
 # TrkQual
-Scripts for training TrkQual on TrkAna (v3) trees
+Scripts for training TrkQual on TrkAna (v4) trees
 
 ## Set Up
 Log onto a mu2egpvm machine with a port forwarded:
@@ -43,11 +43,18 @@ You will see a directory listing of the TrkQual directory. Click the TrkQualTrai
 
 Create the ```.dat``` and ```.hxx``` file that we need in Offline
 
- root -l -b CreateInference.C\(\"trkqual\"\)
+ root -l -b CreateInference.C\(\"TrkQual_ANN1\"\)
 
-and copy them to the correct places
 
- cp code/trkqual.dat ../Offline/TrkDiag/data/
- cp code/trkqual.hxx ../Offline/TrkDiag/inc/
+If you did not change the model, then you just need to copy the .dat file to Offline with an updated version number
+
+ cp code/TrkQual_ANN1.dat ../Offline/TrkDiag/data/TrkQual_ANN1_vX.dat
+
+and make sure that the new .dat file is used in the TrackQuality module.
+
+If you did change the model, then you need to copy both the .hxx and .dat file
+
+ cp code/TrkQual_ANN2.hxx ../Offline/TrkDiag/inc/TrkQual_ANN2.hxx
+ cp code/TrkQual_ANN2.dat ../Offline/TrkDiag/data/TrkQual_ANN2_v1.dat
  
-Make sure features are updated in the TrackQuality module
+and make sure that the new model is implemented correctly the TrackQuality module.
