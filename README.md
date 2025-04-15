@@ -24,8 +24,7 @@ Then every time you log in do:
 ```
 cd /path/to/your/work/area/
 mu2einit
-source /cvmfs/mu2e.opensciencegrid.org/env/ana/current/bin/activate
-muse setup EventNtuple
+source /exp/mu2e/data/users/sgrant/EAF/env/rootana_v2.0.0/bin/activate
 cd TrkQual/
 ```
 
