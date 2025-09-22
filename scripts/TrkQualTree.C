@@ -44,7 +44,12 @@ void TrkQualTree(std::string filename, std::string outfilename) {
   RooUtil util(filename);
   //  util.Debug(true);
   // Loop through the events
-  for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
+  int n_events = util.GetNEvents();
+  for (int i_event = 0; i_event < n_events; ++i_event) {
+    if (i_event % 10000 == 0) {
+      std::cout << i_event << " / " << n_events << std::endl;
+    }
+ 
     // Get the next event
     auto& event = util.GetEvent(i_event);
 

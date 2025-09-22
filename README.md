@@ -24,7 +24,7 @@ Then every time you log in do:
 ```
 cd /path/to/your/work/area/
 mu2einit
-source /exp/mu2e/data/users/sgrant/EAF/env/rootana_v2.0.0/bin/activate
+pyenv rootana 2.0.0
 cd TrkQual/
 ```
 
