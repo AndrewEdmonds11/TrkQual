@@ -14,7 +14,10 @@ The [jupyter notebook](TrkQualTrain.ipynb) contains lots of information close to
 * the features trained on (search for ```feature```), and
 * the model structure (search for "Model Definitions")
 
-## How to (Re)Train
+## How to Interested (Re)Trainer
+For those who are interested in either (a) retraining the current algorithm (e.g. we have updated reconstruction), or (b) investigating or updating an old model
+
+### General Overview
 There are two steps to releasing an updated TrkQual algorithm:
 
 1. Train the algorithm and save the model as an ONNX file, and
@@ -22,34 +25,52 @@ There are two steps to releasing an updated TrkQual algorithm:
 
 Each of these will be done in a different environment.
 
-### Training the Model
+### Setup
+You will need to clone your fork of the repository:
+
+* go to www.github.com/AndrewEdmonds11/TrkQual and click "fork"
+* then in your terminal:
+```
+cd /path/to/your/work/area/
+
+# only need to do this once
+git clone https://www.github.com/YourGitHubUsername/TrkQual.git
+cd TrkQual/
+git remote add -f andy https://www.github.com/AndrewEdmonds11/TrkQual.git
+
+# do these whenever you are doing new development
+git fetch andy main # get the latest and greatest
+git checkout --no-track -b your-new-branchname andy/main
+```
+
+#### Setup for Training
+For training, you need to ssh into a mu2egpvm machine with a port forwarded, and setup the correct python environment:
+
+```
+ssh -L XXXX:localhost:XXXX username@mu2egpvmYY.fnal.gov # XXXX is any port number, and YY is the gpvm number
+cd /path/to/your/work/area/
+mu2einit
+pyenv rootana 2.0.0
+```
+
+#### Setup for Creating Inference Code
+For creating inference code, we need a different environment:
+
+```
+ssh username@mu2egpvmYY.fnal.gov
+cd /path/to/your/work/area/
+mu2einit
+muse setup EventNtuple
+```
+
+### Retraining a Model
 This is done using the Jupyter notebook
 
 To train TrkQual we create a "TrkQualTree" from the EventNtuple using RooUtil. Then we use a jupyter notebook to perform the training
 
 ## Set Up
-Log onto a mu2egpvm machine with a port forwarded:
 
-```
-ssh -L XXXX:localhost:XXXX username@mu2egpvmYY.fnal.gov
-```
 
-where XXXX is a port number. You will need to do this every time you log in.
-
-Assuming you have a work area ```/path/to/your/work/area/```, do the following:
-
-```
-cd /path/to/your/work/area/
-git clone https://www.github.com/AndrewEdmonds11/TrkQual.git # (or git clone your fork)
-```
-
-Then every time you log in do:
-```
-cd /path/to/your/work/area/
-mu2einit
-pyenv rootana 2.0.0
-cd TrkQual/
-```
 
 Now start a jupyter notebook:
 
