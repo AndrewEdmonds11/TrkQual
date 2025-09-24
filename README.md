@@ -1,7 +1,30 @@
 # TrkQual
-Scripts for training TrkQual on EventNtuple (v6)
 
-## Overview
+## Introduction
+The TrkQual algorithm is trained to classify tracks as either "high quality" or "low quality". At the moment, the model implemented in Offline is an Artificial Neural Network (see [here](https://github.com/Mu2e/Offline/blob/main/TrkDiag/src/TrackQuality_module.cc))
+
+This README covers:
+* where an analyzer can find things they might like to know (e.g. the definition of high quality and low quality), and
+* instructions for those interested in retraining or improving on the model
+
+## For the Interested Analyzer
+The [jupyter notebook](TrkQualTrain.ipynb) contains lots of information close to the top of the file includings:
+* EventNtuple datasets used (search for ```training_dataset```),
+* definitions of high quality and low quality (search for ```high_qual``` and ```low_qual```),
+* the features trained on (search for ```feature```), and
+* the model structure (search for "Model Definitions")
+
+## How to (Re)Train
+There are two steps to releasing an updated TrkQual algorithm:
+
+1. Train the algorithm and save the model as an ONNX file, and
+1. Convert the trained model into C++ inference code to copy into Offline
+
+Each of these will be done in a different environment.
+
+### Training the Model
+This is done using the Jupyter notebook
+
 To train TrkQual we create a "TrkQualTree" from the EventNtuple using RooUtil. Then we use a jupyter notebook to perform the training
 
 ## Set Up
@@ -27,23 +50,6 @@ mu2einit
 pyenv rootana 2.0.0
 cd TrkQual/
 ```
-
-## Training TrkQual
-First choose an EventNtuple dataset that you want to train on and create a filelist e.g.
-
-```
-setup mu2efiletools
-mkdir filelist/
-mu2eDatasetFileList nts.mu2e.CeEndpointMix1BBTriggered.MDC2020an_v06_01_01_best_v1_3.root > filelists/nts.mu2e.CeEndpointMix1BBTriggered.MDC2020an_v06_01_01_best_v1_3.root.list
-```
-
-Then create a copy of ```scripts/TrkQualTree_v2_0.C``` and edit it so that ```input_filename``` points to your filelist and ```output_filename``` points to somewhere you can write to. To run the script:
-
-```
-root -l -b scripts/TrkQualTree_vX_X.C+
-```
-
-You will now have a TrkQualTree in the file given by ```output_filename```.
 
 Now start a jupyter notebook:
 
