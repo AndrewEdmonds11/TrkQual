@@ -45,11 +45,9 @@ void TrkQualTree(std::string filename, std::string outfilename) {
   //  util.Debug(true);
   // Loop through the events
   int n_events = util.GetNEvents();
+  std::cout << "Running over " << n_events << " events..." << std::endl;
   for (int i_event = 0; i_event < n_events; ++i_event) {
-    if (i_event % 10000 == 0) {
-      std::cout << i_event << " / " << n_events << std::endl;
-    }
- 
+
     // Get the next event
     auto& event = util.GetEvent(i_event);
 
@@ -106,4 +104,5 @@ void TrkQualTree(std::string filename, std::string outfilename) {
   outfile->cd();
   tree->Write();
   outfile->Close();
+  std::cout << "Script complete." << std::endl;
 }
