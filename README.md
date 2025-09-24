@@ -1,60 +1,116 @@
 # TrkQual
-Scripts for training TrkQual on TrkAna (v4) trees
 
-## Set Up
-Log onto a mu2egpvm machine with a port forwarded:
+## Introduction
+The TrkQual algorithm is trained to classify tracks as either "high quality" or "low quality". At the moment, the model implemented in Offline is an Artificial Neural Network (see [here](https://github.com/Mu2e/Offline/blob/main/TrkDiag/src/TrackQuality_module.cc))
 
-    ssh -L XXXX:localhost:XXXX username@mu2egpvmYY.fnal.gov
+This README covers:
+* where an analyzer can find things they might like to know (e.g. the definition of high quality and low quality), and
+* instructions for those interested in retraining or improving on the model
 
-where XXXX is a port number. You will need to do this every time you log in.
+## For the Interested Analyzer
+The [jupyter notebook](TrkQualTrain.ipynb) contains lots of information close to the top of the file includings:
+* EventNtuple datasets used (search for ```training_dataset```),
+* definitions of high quality and low quality (search for ```high_qual``` and ```low_qual```),
+* the features trained on (search for ```feature```), and
+* the model structure (search for "Model Definitions")
 
-Then change directory to a working area and copy the repositry:
+## For the Interested (Re)Trainer
+For those who are interested in either (a) retraining the current algorithm (e.g. we have updated reconstruction), or (b) investigating or updating an old model
 
-    cd /to/your/work/area/
-    git clone https://www.github.com/AndrewEdmonds11/TrkQual.git
+### General Overview
+There are two steps to releasing an updated TrkQual algorithm:
 
-If you want to commit any changes you make, then you will need to make your own fork and do:
+1. Train the algorithm and save the model as an ONNX file, and
+1. Convert the trained model into C++ inference code to copy into Offline
 
-    git clone git@github.com:YourGitHubUsername/TrkQual.git
+Each of these will be done in a different environment.
 
-instead.
+### General Setup
+You will need to create your own fork of the repository:
 
-Then change directory into TrkQual and setup the environment:
+* go to www.github.com/AndrewEdmonds11/TrkQual and click "fork"
+* then in your terminal:
+```
+cd /path/to/your/work/area/
 
-    cd TrkQual/
-    setup mu2e
-    setup pyana v1_04_00
+# only need to do this once
+git clone https://www.github.com/YourGitHubUsername/TrkQual.git
+cd TrkQual/
+git remote add -f andy https://www.github.com/AndrewEdmonds11/TrkQual.git
 
-where you will need to do these setup commands every time you log in.
+# do these whenever you are doing new development
+git fetch andy main # get the latest and greatest
+git checkout --no-track -b your-new-branchname andy/main
+```
 
-## Training and saving a model
-To train you should have logged in with port XXXX forwarded (see above), and then you can do:
+### Training a Model
+For training, you need to ssh into a mu2egpvm machine with a port forwarded, and setup the correct python environment:
 
-    cd /to/your/work/area/TrkQual
-    setup mu2e
-    setup pyana
-    jupyter-notebook --no-browser --port=XXXX
+```
+ssh -L XXXX:localhost:XXXX username@mu2egpvmYY.fnal.gov # XXXX is any port number, and YY is the gpvm number
+cd /path/to/your/work/area/
+mu2einit
+pyenv rootana 2.0.0
+```
 
-then copy and paste the URL that prints out to your browser.
+You can start a jupyter notebook like so:
 
-You will see a directory listing of the TrkQual directory. Click the TrkQualTrain.ipynb to open the notebook in your browser. Make any changes that you want to the trainings (e.g. new variables, train on a different dataset) and then click "Kernel->Restart & Run All". Your model will be saved in the model/ directory.
+```
+jupyter-notebook --no-browser --port=XXXX # XXXX is the same port that you forwarded when you ssh'd in
+```
 
-## Exporting a saved model to be used in Offline
+and copy and paste the URL to your browser to open it.
 
-Create the ```.dat``` and ```.hxx``` file that we need in Offline
+You will see a directory listing of the TrkQual directory. Click the TrkQualTrain.ipynb to open the notebook in your browser.
 
- root -l -b CreateInference.C\(\"TrkQual_ANN1\"\)
+Make any changes that you want to make:
+* if this is just a retraining with updated datasets, you can just change the dataset names in section "Common Definitions", and the ```training_version_numbers``` in "Model Definitions"
+* if you want to add or remove features, you can do that in "Common Definitions" too
+* if you want to add a new model, then you can do that in the cell that says ```A new model can go in this cell```
+   * if you want to modify the ANN1 model (e.g. change structure, or activation functioon), then I would copy it into this new cell and call it ANN2
+   * if you want to try a brandh new model (e.g. a BDT), then you may need to write a new ```save_func``` etc.
+
+Once ready, click "Kernel->Restart & Run All". You will see a bunch of plots, including some comparisons to previous models. Your model will be saved in the model/ directory along with a ```*plots.root``` file containing histograms.
 
 
-If you did not change the model, then you just need to copy the .dat file to Offline with an updated version number
+### Converting a Model for Use in Offline
+There are two things we need to get the model running in Offline:
+* a ```.hxx``` file containing code, and
+* a ```.dat``` file containing parameters
 
- cp code/TrkQual_ANN1.dat ../Offline/TrkDiag/data/TrkQual_ANN1_vX.dat
+For creating inference code, we use a different environment than for training:
+
+```
+ssh username@mu2egpvmYY.fnal.gov
+cd /path/to/your/work/area/
+mu2einit
+muse setup EventNtuple
+cd TrkQual/
+```
+
+You can then generate the inference code like so:
+
+```
+root -l -b scripts/CreateInference.C\(\"TrkQual_ANN1_v2\"\)
+```
+
+If you did not change the model, then you (should) just need to copy the .dat file to Offline (from experience this isn't always the case)
+
+```
+cp code/TrkQual_ANN1_v2.dat ../Offline/TrkDiag/data/
+```
 
 and make sure that the new .dat file is used in the TrackQuality module.
 
-If you did change the model, then you need to copy both the .hxx and .dat file
+If you modified the ANN model, then you need to copy both the .hxx and .dat file
 
- cp code/TrkQual_ANN2.hxx ../Offline/TrkDiag/inc/TrkQual_ANN2.hxx
- cp code/TrkQual_ANN2.dat ../Offline/TrkDiag/data/TrkQual_ANN2_v1.dat
- 
+```
+cp code/TrkQual_ANN2_v1.hxx ../Offline/TrkDiag/inc/
+cp code/TrkQual_ANN2_v1.dat ../Offline/TrkDiag/data/
+```
+
 and make sure that the new model is implemented correctly the TrackQuality module.
+
+If you trained a different model, then you are entering new territory and should discuss with experts how best to implement. Either:
+* we make the ```TrackQuality``` module model agnostic, or
+* we write separate ```TrackQuality``` modules for different models...
